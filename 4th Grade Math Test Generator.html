@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4th Grade Math Test</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin: 20px 0;
+        }
+        
+        .start-screen, .results-screen {
+            text-align: center;
+        }
+        
+        .start-screen h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .generate-btn, .restart-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .generate-btn:hover, .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .test-screen {
+            display: none;
+        }
+        
+        .question {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        
+        .question h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .option {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+        
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .submit-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            background: #218838;
+        }
+        
+        .results-screen {
+            display: none;
+        }
+        
+        .score {
+            font-size: 2em;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        
+        .grade {
+            font-size: 1.5em;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .grade.excellent { background: #d4edda; color: #155724; }
+        .grade.good { background: #fff3cd; color: #856404; }
+        .grade.needs-improvement { background: #f8d7da; color: #721c24; }
+        
+        .progress-bar {
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        
+        .detailed-results {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .detailed-results h3 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .result-item {
+            background: #f8f9ff;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            border-left: 4px solid #ddd;
+        }
+        
+        .result-item.correct {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .result-item.incorrect {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .result-answer {
+            font-size: 0.9em;
+            margin: 3px 0;
+        }
+        
+        .result-answer.correct-answer {
+            color: #28a745;
+        }
+        
+        .result-answer.user-answer {
+            color: #dc3545;
+        }
+        
+        .result-status {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .result-status.correct {
+            color: #28a745;
+        }
+        
+        .result-status.incorrect {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="startScreen" class="container start-screen">
+        <h1>🎓 4th Grade Math Test 🎓</h1>
+        <p>Welcome to your personalized math test! Each time you generate a test, you'll get new random problems to solve.</p>
+        <p><strong>Instructions:</strong> Solve each problem carefully and select the correct answer.</p>
+        <button class="generate-btn" onclick="generateTest()">Generate New Test</button>
+    </div>
+
+    <!-- Test Screen -->
+    <div id="testScreen" class="container test-screen">
+        <h2>4th Grade Math Test</h2>
+        <div id="questions"></div>
+        <button class="submit-btn" onclick="submitTest()">Submit Test</button>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultsScreen" class="container results-screen">
+        <h2>🎉 Test Results 🎉</h2>
+        <div class="score" id="scoreDisplay"></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="grade" id="gradeDisplay"></div>
+        <p id="encouragement"></p>
+        
+        <div class="detailed-results">
+            <h3>📋 Detailed Results</h3>
+            <div id="resultsList"></div>
+        </div>
+        
+        <button class="restart-btn" onclick="restartTest()">Take Another Test</button>
+    </div>
+
+    <script>
+        let questions = [];
+        let answers = [];
+        let userAnswers = [];
+
+        function random(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateTest() {
+            questions = [];
+            answers = [];
+            userAnswers = [];
+
+            // Generate 30 questions with random values
+            questions.push(generateMultiplyQuestion());
+            questions.push(generateDivideQuestion());
+            questions.push(generateAddQuestion());
+            questions.push(generateSubtractQuestion());
+            questions.push(generateRoundQuestion());
+            questions.push(generateFactorQuestion());
+            questions.push(generateMultipleQuestion());
+            questions.push(generateCompareQuestion());
+            questions.push(generatePlaceValueQuestion());
+            questions.push(generateWordProblem1());
+            questions.push(generateFractionAddQuestion());
+            questions.push(generateEquivalentFractionQuestion());
+            questions.push(generateCompareFractionQuestion());
+            questions.push(generateMultiplyFractionQuestion());
+            questions.push(generateDecimalFractionQuestion());
+            questions.push(generateCompareDecimalQuestion());
+            questions.push(generateWordProblem2());
+            questions.push(generateMeasurementQuestion());
+            questions.push(generateTimeQuestion());
+            questions.push(generateWordProblem3());
+            questions.push(generateAreaQuestion());
+            questions.push(generatePerimeterQuestion());
+            questions.push(generateAngleQuestion());
+            questions.push(generateWordProblem4());
+            questions.push(generateWordProblem5());
+            questions.push(generatePatternQuestion());
+            questions.push(generateLCMQuestion());
+            questions.push(generateWordProblem6());
+            questions.push(generateDataQuestion());
+            questions.push(generateWordProblem7());
+
+            displayTest();
+        }
+
+        function generateMultiplyQuestion() {
+            const a = random(12, 89);
+            const b = random(2, 9);
+            const correct = a * b;
+            const options = [correct - random(5, 15), correct, correct + random(5, 15), correct + random(20, 30)];
+            answers.push(1);
+            return {
+                text: `**Multiply**: What is ${a} × ${b}?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateDivideQuestion() {
+            const b = random(6, 12);
+            const correct = random(6, 12);
+            const a = b * correct;
+            const options = [correct - 1, correct + 1, correct, correct + 2];
+            answers.push(2);
+            return {
+                text: `**Divide**: What is ${a} ÷ ${b}?`,
+                options: shuffleWithCorrectAt(options, 2)
+            };
+        }
+
+        function generateAddQuestion() {
+            const a = random(456, 789);
+            const b = random(234, 456);
+            const correct = a + b;
+            const options = [correct - 10, correct - 20, correct, correct + 10];
+            answers.push(2);
+            return {
+                text: `**Add**: What is ${a.toLocaleString()} + ${b}?`,
+                options: shuffleWithCorrectAt(options.map(x => x.toLocaleString()), 2)
+            };
+        }
+
+        function generateSubtractQuestion() {
+            const a = random(1200, 1800);
+            const b = random(567, 889);
+            const correct = a - b;
+            const options = [correct - 10, correct, correct + 10, correct + 20];
+            answers.push(1);
+            return {
+                text: `**Subtract**: What is ${a.toLocaleString()} - ${b}?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateRoundQuestion() {
+            const num = random(3000, 8999);
+            const hundreds = Math.floor(num / 100) * 100;
+            const correct = (num % 100 >= 50) ? hundreds + 100 : hundreds;
+            const options = [correct - 100, correct, correct + 100, correct + 200];
+            answers.push(1);
+            return {
+                text: `**Round**: What is ${num.toLocaleString()} rounded to the nearest hundred?`,
+                options: shuffleWithCorrectAt(options.map(x => x.toLocaleString()), 1)
+            };
+        }
+
+        function generateFactorQuestion() {
+            const numbers = [12, 15, 16, 18, 20, 24];
+            const num = numbers[random(0, numbers.length - 1)];
+            const factors = [];
+            for (let i = 1; i <= num; i++) {
+                if (num % i === 0) factors.push(i);
+            }
+            const correct = factors[random(1, factors.length - 2)]; // Skip 1 and the number itself
+            const wrong = [correct + 1, correct + 2, correct - 1].filter(x => x > 1 && !factors.includes(x));
+            const options = [wrong[0], correct, wrong[1], wrong[2]];
+            answers.push(1);
+            return {
+                text: `**Factors**: Which number is a factor of ${num}?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateMultipleQuestion() {
+            const base = random(3, 7);
+            const position = random(4, 8);
+            const correct = base * position;
+            const options = [correct - base, correct - base * 2, correct, correct + base];
+            answers.push(2);
+            return {
+                text: `**Multiples**: What is the ${getOrdinal(position)} multiple of ${base}?`,
+                options: shuffleWithCorrectAt(options, 2)
+            };
+        }
+
+        function generateCompareQuestion() {
+            const a = random(5000, 9999);
+            const b = a + random(-500, 500);
+            const symbol = a > b ? '>' : a < b ? '<' : '=';
+            const options = ['>', '<', '=', '≠'];
+            const correctIndex = options.indexOf(symbol);
+            answers.push(correctIndex);
+            return {
+                text: `**Compare**: How does ${a.toLocaleString()} compare to ${b.toLocaleString()}?`,
+                options: options
+            };
+        }
+
+        function generatePlaceValueQuestion() {
+            const digits = [random(1, 9), random(0, 9), random(1, 9), random(0, 9), random(0, 9)];
+            const number = digits.join('');
+            const position = random(0, 4);
+            const digit = digits[position];
+            const placeValues = [10000, 1000, 100, 10, 1];
+            const correct = digit * placeValues[position];
+            const options = [correct / 10, correct, correct * 10, correct * 100];
+            answers.push(1);
+            return {
+                text: `**Place Value**: What is the value of the digit ${digit} in ${parseInt(number).toLocaleString()}?`,
+                options: shuffleWithCorrectAt(options.map(x => x.toLocaleString()), 1)
+            };
+        }
+
+        function generateWordProblem1() {
+            const quantity = random(4, 12);
+            const price = random(2, 8);
+            const correct = (price / quantity).toFixed(2);
+            const options = [
+                (correct - 0.25).toFixed(2),
+                correct,
+                (parseFloat(correct) + 0.25).toFixed(2),
+                (parseFloat(correct) + 0.50).toFixed(2)
+            ];
+            answers.push(1);
+            return {
+                text: `**Word Problem**: A store sells ${quantity} apples for $${price}. How much does 1 apple cost?`,
+                options: shuffleWithCorrectAt(options.map(x => `$${x}`), 1)
+            };
+        }
+
+        function generateFractionAddQuestion() {
+            const denominator = random(4, 10);
+            const a = random(1, denominator - 2);
+            const b = random(1, denominator - a - 1);
+            const correct = `${a + b}/${denominator}`;
+            const options = [`${a + b}/${denominator * 2}`, correct, `${a + b - 1}/${denominator}`, `${denominator}/${denominator}`];
+            answers.push(1);
+            return {
+                text: `**Fractions**: What is ${a}/${denominator} + ${b}/${denominator}?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateEquivalentFractionQuestion() {
+            const pairs = [[2, 4], [3, 6], [4, 8], [5, 10], [6, 12]];
+            const pair = pairs[random(0, pairs.length - 1)];
+            const a = pair[0], b = pair[1];
+            const num = random(2, 4);
+            const correct = `${a * num}/${b * num}`;
+            const options = [correct, `${a * num}/${b}`, `${a}/${b * num}`, `${b}/${a * num}`];
+            answers.push(0);
+            return {
+                text: `**Equivalent Fractions**: Which fraction is equivalent to ${a}/${b}?`,
+                options: options
+            };
+        }
+
+        function generateCompareFractionQuestion() {
+            const frac1 = [random(1, 5), random(6, 10)];
+            const frac2 = [random(1, 5), random(6, 10)];
+            const val1 = frac1[0] / frac1[1];
+            const val2 = frac2[0] / frac2[1];
+            const symbol = val1 > val2 ? '>' : val1 < val2 ? '<' : '=';
+            const options = ['>', '<', '=', '≠'];
+            const correctIndex = options.indexOf(symbol);
+            answers.push(correctIndex);
+            return {
+                text: `**Compare Fractions**: How does ${frac1[0]}/${frac1[1]} compare to ${frac2[0]}/${frac2[1]}?`,
+                options: options
+            };
+        }
+
+        function generateMultiplyFractionQuestion() {
+            const frac = [1, random(3, 8)];
+            const whole = random(4, 12);
+            const correct = Math.floor(whole / frac[1]);
+            const options = [correct - 1, correct, correct + 1, correct + 2];
+            answers.push(1);
+            return {
+                text: `**Multiply Fractions**: What is ${frac[0]}/${frac[1]} × ${whole}?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateDecimalFractionQuestion() {
+            const decimals = [0.2, 0.4, 0.5, 0.6, 0.8];
+            const fractions = ['1/5', '2/5', '1/2', '3/5', '4/5'];
+            const index = random(0, decimals.length - 1);
+            const decimal = decimals[index];
+            const correct = fractions[index];
+            const wrongOptions = fractions.filter((_, i) => i !== index);
+            const options = [wrongOptions[0], correct, wrongOptions[1], wrongOptions[2]];
+            answers.push(1);
+            return {
+                text: `**Decimals**: What is ${decimal} written as a fraction in simplest form?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateCompareDecimalQuestion() {
+            const a = (random(10, 99) / 100).toFixed(2);
+            const b = (random(10, 99) / 100).toFixed(2);
+            const symbol = parseFloat(a) > parseFloat(b) ? '>' : parseFloat(a) < parseFloat(b) ? '<' : '=';
+            const options = ['>', '<', '=', '≠'];
+            const correctIndex = options.indexOf(symbol);
+            answers.push(correctIndex);
+            return {
+                text: `**Compare Decimals**: How does ${a} compare to ${b}?`,
+                options: options
+            };
+        }
+
+        function generateWordProblem2() {
+            const length = (random(15, 35) / 10).toFixed(1);
+            const quantity = random(2, 5);
+            const correct = (parseFloat(length) * quantity).toFixed(1);
+            const options = [
+                (parseFloat(correct) - 1.5).toFixed(1),
+                correct,
+                (parseFloat(correct) + 0.5).toFixed(1),
+                (parseFloat(correct) + 1.5).toFixed(1)
+            ];
+            answers.push(1);
+            return {
+                text: `**Word Problem**: A book is ${length} meters long. How long are ${quantity} such books?`,
+                options: shuffleWithCorrectAt(options.map(x => `${x} meters`), 1)
+            };
+        }
+
+        function generateMeasurementQuestion() {
+            const meters = random(3, 8);
+            const correct = meters * 100;
+            const options = [correct / 10, correct, correct * 10, correct * 100];
+            answers.push(1);
+            return {
+                text: `**Measurement**: Convert ${meters} meters to centimeters.`,
+                options: shuffleWithCorrectAt(options.map(x => `${x} cm`), 1)
+            };
+        }
+
+        function generateTimeQuestion() {
+            const hours = random(1, 4);
+            const minutes = random(15, 55);
+            const correct = hours * 60 + minutes;
+            const options = [correct - 15, correct, correct + 15, correct + 30];
+            answers.push(1);
+            return {
+                text: `**Time**: How many minutes are in ${hours} hour${hours > 1 ? 's' : ''} and ${minutes} minutes?`,
+                options: shuffleWithCorrectAt(options.map(x => `${x} minutes`), 1)
+            };
+        }
+
+        function generateWordProblem3() {
+            const startHour = random(2, 4);
+            const startMin = random(0, 3) * 15;
+            const durationHour = random(1, 2);
+            const durationMin = random(2, 4) * 15;
+            
+            const endHour = startHour + durationHour + Math.floor((startMin + durationMin) / 60);
+            const endMin = (startMin + durationMin) % 60;
+            
+            const startTime = `${startHour}:${startMin.toString().padStart(2, '0')} PM`;
+            const endTime = `${endHour}:${endMin.toString().padStart(2, '0')} PM`;
+            const duration = `${durationHour} hour${durationHour > 1 ? 's' : ''} and ${durationMin} minutes`;
+            
+            const options = [
+                `${endHour - 1}:${endMin.toString().padStart(2, '0')} PM`,
+                endTime,
+                `${endHour}:${(endMin + 15) % 60} PM`,
+                `${endHour + 1}:${endMin.toString().padStart(2, '0')} PM`
+            ];
+            answers.push(1);
+            return {
+                text: `**Word Problem**: A movie starts at ${startTime} and lasts ${duration}. What time does it end?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateAreaQuestion() {
+            const length = random(4, 9);
+            const width = random(3, 7);
+            const correct = length * width;
+            const options = [length + width, correct - 5, correct, correct + 6];
+            answers.push(2);
+            return {
+                text: `**Area**: A rectangle has a length of ${length} units and a width of ${width} units. What is its area?`,
+                options: shuffleWithCorrectAt(options.map(x => `${x} square units`), 2)
+            };
+        }
+
+        function generatePerimeterQuestion() {
+            const length = random(6, 12);
+            const width = random(2, 6);
+            const correct = 2 * (length + width);
+            const options = [length + width, correct, length * width, correct + 6];
+            answers.push(1);
+            return {
+                text: `**Perimeter**: What is the perimeter of a rectangle with length ${length} units and width ${width} units?`,
+                options: shuffleWithCorrectAt(options.map(x => `${x} units`), 1)
+            };
+        }
+
+        function generateAngleQuestion() {
+            const angles = ['Acute', 'Right', 'Obtuse', 'Straight'];
+            const degrees = [60, 90, 120, 180];
+            const index = random(0, 3);
+            const correct = angles[index];
+            const degree = degrees[index];
+            const options = ['Acute', 'Right', 'Obtuse', 'Straight'];
+            const correctIndex = options.indexOf(correct);
+            answers.push(correctIndex);
+            return {
+                text: `**Angles**: What type of angle measures exactly ${degree} degrees?`,
+                options: options
+            };
+        }
+
+        function generateWordProblem4() {
+            const quantity = random(8, 16);
+            const totalPrice = quantity * random(100, 200) / 100;
+            const correct = (totalPrice / quantity).toFixed(2);
+            const options = [
+                (parseFloat(correct) - 0.50).toFixed(2),
+                correct,
+                (parseFloat(correct) + 0.50).toFixed(2),
+                (parseFloat(correct) + 1.00).toFixed(2)
+            ];
+            answers.push(1);
+            return {
+                text: `**Word Problem**: A bakery sells ${quantity} muffins for $${totalPrice.toFixed(2)}. How much does 1 muffin cost?`,
+                options: shuffleWithCorrectAt(options.map(x => `$${x}`), 1)
+            };
+        }
+
+        function generateWordProblem5() {
+            const total = random(36, 72);
+            const friends = [4, 6, 8, 9, 12].find(f => total % f === 0) || 6;
+            const correct = total / friends;
+            const options = [correct - 1, correct + 1, correct, correct + 2];
+            answers.push(2);
+            return {
+                text: `**Word Problem**: Sam has ${total} stickers and shares them equally among ${friends} friends. How many stickers does each friend get?`,
+                options: shuffleWithCorrectAt(options, 2)
+            };
+        }
+
+        function generatePatternQuestion() {
+            const start = random(2, 5);
+            const multiplier = 2;
+            const sequence = [start];
+            for (let i = 1; i < 4; i++) {
+                sequence.push(sequence[i-1] * multiplier);
+            }
+            const correct = sequence[3] * multiplier;
+            const options = [correct - sequence[0], correct, correct + sequence[0], correct * 1.5];
+            answers.push(1);
+            return {
+                text: `**Patterns**: What is the next number in the sequence: ${sequence.join(', ')}, __?`,
+                options: shuffleWithCorrectAt(options, 1)
+            };
+        }
+
+        function generateLCMQuestion() {
+            const pairs = [[4, 6, 12], [3, 5, 15], [6, 8, 24], [4, 10, 20]];
+            const pair = pairs[random(0, pairs.length - 1)];
+            const a = pair[0], b = pair[1], correct = pair[2];
+            const options = [a * b / 2, correct - 2, correct, correct * 2];
+            answers.push(2);
+            return {
+                text: `**Least Common Multiple**: What is the least common multiple of ${a} and ${b}?`,
+                options: shuffleWithCorrectAt(options, 2)
+            };
+        }
+
+        function generateWordProblem6() {
+            const length = random(6, 12);
+            const quantity = random(3, 6);
+            const correct = length * quantity;
+            const options = [correct - 4, correct, correct + 4, correct + 8];
+            answers.push(1);
+            return {
+                text: `**Word Problem**: A garden is ${length} meters long. How long are ${quantity} such gardens?`,
+                options: shuffleWithCorrectAt(options.map(x => `${x} meters`), 1)
+            };
+        }
+
+        function generateDataQuestion() {
+            const cats = random(2, 6);
+            const dogs = random(3, 7);
+            const birds = random(1, 5);
+            const correct = cats + dogs + birds;
+            const options = [correct - 2, correct - 1, correct, correct + 1];
+            answers.push(2);
+            return {
+                text: `**Data**: A survey shows ${cats} cats, ${dogs} dogs, and ${birds} birds. What is the total number of pets?`,
+                options: shuffleWithCorrectAt(options, 2)
+            };
+        }
+
+        function generateWordProblem7() {
+            const daily = random(15, 25);
+            const days = random(4, 7);
+            const correct = daily * days;
+            const options = [correct - 20, correct, correct + 20, correct + 40];
+            answers.push(1);
+            return {
+                text: `**Word Problem**: A cyclist rides ${daily} kilometers each day. How many kilometers does she ride in ${days} days?`,
+                options: shuffleWithCorrectAt(options.map(x => `${x} kilometers`), 1)
+            };
+        }
+
+        function shuffleWithCorrectAt(arr, correctIndex) {
+            const result = [...arr];
+            const correct = result[correctIndex];
+            
+            // Shuffle the array
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            
+            // Update the answer index to where the correct answer ended up
+            const newCorrectIndex = result.indexOf(correct);
+            answers[answers.length - 1] = newCorrectIndex;
+            
+            return result;
+        }
+
+        function getOrdinal(num) {
+            const ordinals = ['', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth'];
+            return ordinals[num] || `${num}th`;
+        }
+
+        function displayTest() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('testScreen').style.display = 'block';
+            
+            const questionsDiv = document.getElementById('questions');
+            questionsDiv.innerHTML = '';
+            
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <h3>${index + 1}. ${q.text}</h3>
+                    <div class="options">
+                        ${q.options.map((option, optIndex) => 
+                            `<div class="option" onclick="selectOption(${index}, ${optIndex})" data-question="${index}" data-option="${optIndex}">
+                                ${String.fromCharCode(97 + optIndex)}) ${option}
+                            </div>`
+                        ).join('')}
+                    </div>
+                `;
+                questionsDiv.appendChild(questionDiv);
+            });
+            
+            userAnswers = new Array(questions.length).fill(-1);
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            // Clear previous selection for this question
+            document.querySelectorAll(`[data-question="${questionIndex}"]`).forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Select the clicked option
+            document.querySelector(`[data-question="${questionIndex}"][data-option="${optionIndex}"]`).classList.add('selected');
+            
+            userAnswers[questionIndex] = optionIndex;
+        }
+
+        function submitTest() {
+            const score = userAnswers.reduce((total, answer, index) => {
+                return total + (answer === answers[index] ? 1 : 0);
+            }, 0);
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            
+            document.getElementById('testScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+            
+            document.getElementById('scoreDisplay').textContent = `${score}/${questions.length} (${percentage}%)`;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            
+            let grade, gradeClass, encouragement;
+            if (percentage >= 90) {
+                grade = "Excellent! 🌟";
+                gradeClass = "excellent";
+                encouragement = "Outstanding work! You've mastered 4th grade math!";
+            } else if (percentage >= 80) {
+                grade = "Good Job! 👍";
+                gradeClass = "good";
+                encouragement = "Great effort! You're doing really well!";
+            } else if (percentage >= 70) {
+                grade = "Keep Practicing! 📚";
+                gradeClass = "good";
+                encouragement = "You're on the right track! A little more practice will help.";
+            } else {
+                grade = "Needs Improvement 💪";
+                gradeClass = "needs-improvement";
+                encouragement = "Don't give up! Practice makes perfect. Try again!";
+            }
+            
+            document.getElementById('gradeDisplay').textContent = grade;
+            document.getElementById('gradeDisplay').className = `grade ${gradeClass}`;
+            document.getElementById('encouragement').textContent = encouragement;
+            
+            // Generate detailed results
+            displayDetailedResults();
+        }
+        
+        function displayDetailedResults() {
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '';
+            
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const correctAnswer = answers[index];
+                const isCorrect = userAnswer === correctAnswer;
+                
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                let userAnswerText = userAnswer >= 0 ? question.options[userAnswer] : 'No answer selected';
+                let correctAnswerText = question.options[correctAnswer];
+                
+                resultDiv.innerHTML = `
+                    <div class="result-question">${index + 1}. ${question.text.replace(/\*\*/g, '')}</div>
+                    <div class="result-answer user-answer">Your answer: ${userAnswerText}</div>
+                    ${!isCorrect ? `<div class="result-answer correct-answer">Correct answer: ${correctAnswerText}</div>` : ''}
+                    <div class="result-status ${isCorrect ? 'correct' : 'incorrect'}">
+                        ${isCorrect ? '✅ Correct!' : '❌ Incorrect'}
+                    </div>
+                `;
+                
+                resultsList.appendChild(resultDiv);
+            });
+        }
+
+        function restartTest() {
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
