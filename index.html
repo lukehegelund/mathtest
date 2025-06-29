@@ -394,17 +394,32 @@
         }
 
         function generatePlaceValueQuestion() {
-            const digits = [random(1, 9), random(0, 9), random(1, 9), random(0, 9), random(0, 9)];
+            // Generate digits ensuring we don't pick a 0 digit for the question
+            const digits = [random(1, 9), random(1, 9), random(1, 9), random(1, 9), random(1, 9)];
             const number = digits.join('');
             const position = random(0, 4);
             const digit = digits[position];
             const placeValues = [10000, 1000, 100, 10, 1];
             const correct = digit * placeValues[position];
-            const options = [correct / 10, correct, correct * 10, correct * 100];
-            answers.push(1);
+            
+            // Generate different options that make sense
+            let options;
+            if (position === 0) { // Ten thousands place
+                options = [correct / 10, correct, correct / 100, correct / 1000];
+            } else if (position === 1) { // Thousands place
+                options = [correct * 10, correct, correct / 10, correct / 100];
+            } else if (position === 2) { // Hundreds place
+                options = [correct / 10, correct, correct * 10, correct / 100];
+            } else if (position === 3) { // Tens place
+                options = [correct, correct * 10, correct / 10, correct * 100];
+            } else { // Ones place
+                options = [correct, correct * 10, correct * 100, correct * 1000];
+            }
+            
+            answers.push(0);
             return {
                 text: `**Place Value**: What is the value of the digit ${digit} in ${parseInt(number).toLocaleString()}?`,
-                options: shuffleWithCorrectAt(options.map(x => x.toLocaleString()), 1)
+                options: options.map(x => x.toLocaleString())
             };
         }
 
